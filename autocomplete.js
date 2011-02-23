@@ -83,17 +83,17 @@ var Autocomplete = Class.create(
         clearTimeout(this.onChangeTimeoutId);
         this.ignoreValueChange = false;
 
-        if (this.typedValue === this.DOMSearchInput.value.toLowerCase())
+        if (this.typedValue === this.formatSearchString(this.DOMSearchInput.value))
         {
             return;
         }
         if (this.options.deferRequestBy > 0)
         {
-            this.onChangeTimeoutId = setTimeout(this.onValueChange.bind(this), this.options.deferRequestBy);
+            this.onChangeTimeoutId = setTimeout(this.onChange.bind(this), this.options.deferRequestBy);
         }
         else
         {
-            this.onValueChange();
+            this.onChange();
         }
     },
     enablekiller: function()
@@ -163,7 +163,7 @@ var Autocomplete = Class.create(
         this.activate(this.selectedIndex + 1);
         this.DOMSearchInput.value = this.suggestions[this.selectedIndex];
     },
-    onValueChange: function()
+    onChange: function()
     {
         clearTimeout(this.onChangeTimeoutId);
         this.lastTypedValue = this.typedValue.toLowerCase();
@@ -199,18 +199,20 @@ var Autocomplete = Class.create(
     },
     select: function(i)
     {
-        var selectedValue = this.suggestions[i];
-
-        if (selectedValue)
+        if (typeof this.suggestions[i] === 'undefined')
         {
-            this.DOMSearchInput.value = selectedValue;
-            if (this.options.autoSubmit && this.DOMSearchInput.up('form'))
-            {
-                this.DOMSearchInput.up('form').submit();
-            }
-            this.ignoreValueChange = true;
-            this.hide();
+            return;
         }
+
+        this.DOMSearchInput.value = this.suggestions[i];
+
+        if (this.options.autoSubmit && this.DOMSearchInput.up('form'))
+        {
+            this.DOMSearchInput.up('form').submit();
+        }
+
+        this.ignoreValueChange = true;
+        this.hide();
     },
     getSuggestions: function()
     {
@@ -258,6 +260,7 @@ var Autocomplete = Class.create(
         var content = [];
 
         content.push('<div class="suggestions">');
+
         this.suggestions.each(function(value, i)
         {
             content.push
@@ -268,6 +271,7 @@ var Autocomplete = Class.create(
                 '<span class="suggestion">', this.highlight(value), '</span>', '</div>'
             );
         }.bind(this));
+
         content.push('</div>');
 
         this.enabled = true;
