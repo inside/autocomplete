@@ -25,14 +25,8 @@ var Autocomplete = Class.create(
             minChars           : 1,     // Ajax request starts when minChars is reached.
             deferRequestBy     : 100    // In milliseconds.
         };
-        this.debug             = true;
 
         Object.extend(this.options, options);
-        this.log('initialize(' + searchInputId +', options) with options:');
-        this.log('serviceUrl: ' + this.options.serviceUrl);
-        this.log('autoSubmit: ' + this.options.autoSubmit);
-        this.log('minChars: ' + this.options.minChars);
-        this.log('deferRequestBy: ' + this.options.deferRequestBy);
         this.DOMSearchInput.setAttribute('autocomplete', 'off');
         this.DOMSearchInput.observe('keydown', this.onKeyDown.bind(this));
         this.DOMSearchInput.observe('keyup', this.onKeyUp.bind(this));
@@ -53,11 +47,9 @@ var Autocomplete = Class.create(
         switch (event.keyCode)
         {
             case Event.KEY_ESC:
-                this.log('onKeyDown(e). KEY_ESC pressed.');
                 this.hide();
                 break;
             case Event.KEY_RETURN:
-                this.log('onKeyDown(e) KEY_RETURN pressed.');
                 if (this.selectedIndex === -1)
                 {
                     this.hide();
@@ -66,11 +58,9 @@ var Autocomplete = Class.create(
                 this.select(this.selectedIndex);
                 break;
             case Event.KEY_UP:
-                this.log('onKeyDown(e) KEY_UP pressed.');
                 this.moveUp();
                 break;
             case Event.KEY_DOWN:
-                this.log('onKeyDown(e) KEY_DOWN pressed.');
                 this.moveDown();
                 break;
             default:
@@ -132,7 +122,6 @@ var Autocomplete = Class.create(
     },
     hide: function()
     {
-        this.log('hide().');
         this.enabled = false;
         this.selectedIndex = -1;
 
@@ -143,7 +132,6 @@ var Autocomplete = Class.create(
     },
     moveUp: function()
     {
-        this.log('moveUp().');
         if (this.selectedIndex === -1)
         {
             this.selectedIndex = this.suggestions.length;
@@ -164,7 +152,6 @@ var Autocomplete = Class.create(
     },
     moveDown: function()
     {
-        this.log('moveDown().');
         if (this.selectedIndex === this.suggestions.length - 1)
         {
             this.DOMSuggestions.firstChild.childNodes[this.selectedIndex].removeClassName('selected');
@@ -178,7 +165,6 @@ var Autocomplete = Class.create(
     },
     onValueChange: function()
     {
-        this.log('onValueChange().');
         clearTimeout(this.onChangeTimeoutId);
         this.lastTypedValue = this.typedValue.toLowerCase();
         this.typedValue = this.formatSearchString(this.DOMSearchInput.value);
@@ -213,7 +199,6 @@ var Autocomplete = Class.create(
     },
     select: function(i)
     {
-        this.log('select().');
         var selectedValue = this.suggestions[i];
 
         if (selectedValue)
@@ -231,7 +216,6 @@ var Autocomplete = Class.create(
     {
         if (Object.isArray(this.cachedResponse[encodeURIComponent(this.accentsTidy(this.typedValue))]))
         {
-            this.log('getSuggestions(). Getting from cache.');
             this.suggestions = this.cachedResponse[encodeURIComponent(this.accentsTidy(this.typedValue))];
             this.suggest();
         }
@@ -241,7 +225,6 @@ var Autocomplete = Class.create(
             {
                 if (!this.lastTypedValue.blank() && this.DOMSearchInput.value.toLowerCase().startsWith(this.lastTypedValue))
                 {
-                    this.log('getSuggestions(). Refine locally.');
                     this.suggestions = this.suggestions.findAll(function(o)
                     {
                         return this.accentsTidy(o).startsWith(this.accentsTidy(this.typedValue));
@@ -252,12 +235,10 @@ var Autocomplete = Class.create(
                 }
                 else
                 {
-                    this.log('getSuggestions(). Refine locally set to false.');
                     this.refineLocally = false;
                 }
             }
 
-            this.log('getSuggestions(). AJAX query: ' + this.options.serviceUrl + ' with parameter: ' + this.typedValue);
             new Ajax.Request(this.options.serviceUrl, {
                 onComplete: this.processResponse.bind(this),
                 sanitizeJSON: true,
@@ -270,12 +251,10 @@ var Autocomplete = Class.create(
     {
         if (this.suggestions.length === 0)
         {
-            this.log('suggest(). Nothing to suggest.');
             this.hide();
             return;
         }
 
-        this.log('suggest(). Iterating over the ' + this.suggestions.length + ' suggestions.');
         var content = [];
 
         content.push('<div class="suggestions">');
@@ -332,7 +311,6 @@ var Autocomplete = Class.create(
     },
     activate: function(index)
     {
-        this.log('activate().');
         var childs = this.DOMSuggestions.firstChild.childNodes;
         var activeItem;
 
@@ -364,13 +342,6 @@ var Autocomplete = Class.create(
         r = r.replace(new RegExp('[ùúûü]', 'g')  , 'u');
         r = r.replace(new RegExp('[ýÿ]', 'g')    , 'y');
         return r;
-    },
-    log: function(debug)
-    {
-        if (this.debug && console)
-        {
-            console.log(debug);
-        }
     }
 });
 
