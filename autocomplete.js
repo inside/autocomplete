@@ -12,7 +12,7 @@ var Autocomplete = Class.create(
         this.boundKiller       = null;  // Used to stop observing the document onclicked outside the search or suggestions.
         this.ignoreValueChange = false; // Onclick or return events, we don't want to suggest anymore.
         this.cachedResponse    = [];    // typedValue/response cache hash table.
-        this.onChangeInterval  = null;  // setInterval/clearInterval id.
+        this.onChangeTimeoutId = null;
         this.typedValue        = '';    // What the user types or selects.
         this.inputValue        = '';    // Mirror of the DOM input
         this.lastTypedValue    = '';    // Used when refining locally.
@@ -40,26 +40,20 @@ var Autocomplete = Class.create(
     },
     createDOMSuggestions: function()
     {
-        var div = new Element('div');
-        div.setStyle(
-        {
-            display: 'none'
-        });
-        div.setAttribute('id', this.suggestionsId);
+        var div = new Element('div', {'id': this.suggestionsId}).setStyle({display: 'none'});
         this.DOMSearchInput.up('form').appendChild(div);
         this.DOMSuggestions = $(this.suggestionsId);
     },
-    onKeyDown: function(e)
+    onKeyDown: function(event)
     {
         if (!this.enabled)
         {
             return;
         }
-        switch (e.keyCode)
+        switch (event.keyCode)
         {
             case Event.KEY_ESC:
                 this.log('onKeyDown(e). KEY_ESC pressed.');
-                this.DOMSearchInput.value = this.inputValue;
                 this.hide();
                 break;
             case Event.KEY_RETURN:
@@ -82,34 +76,37 @@ var Autocomplete = Class.create(
             default:
                 return;
         }
-        e.stop();
+
+        event.stop();
     },
-    onKeyUp: function(e)
+    onKeyUp: function(event)
     {
-        switch (e.keyCode)
+        switch (event.keyCode)
         {
             case Event.KEY_UP:
             case Event.KEY_DOWN:
             case Event.KEY_RETURN:
+            case Event.KEY_ESC:
                 return;
         }
 
-        clearInterval(this.onChangeInterval);
+        clearTimeout(this.onChangeTimeoutId);
         this.ignoreValueChange = false;
 
-        if (this.typedValue !== this.DOMSearchInput.value.toLowerCase())
+        if (this.typedValue === this.DOMSearchInput.value.toLowerCase())
         {
-            if (this.options.deferRequestBy > 0)
-            {
-                this.onChangeInterval = setInterval(this.onValueChange.bind(this), this.options.deferRequestBy);
-            }
-            else
-            {
-                this.onValueChange();
-            }
+            return;
+        }
+        if (this.options.deferRequestBy > 0)
+        {
+            this.onChangeTimeoutId = setTimeout(this.onValueChange.bind(this), this.options.deferRequestBy);
+        }
+        else
+        {
+            this.onValueChange();
         }
     },
-    enablekiller: function(e)
+    enablekiller: function()
     {
         if (this.boundKiller === null)
         {
@@ -168,22 +165,23 @@ var Autocomplete = Class.create(
     moveDown: function()
     {
         this.log('moveDown().');
-        if (this.selectedIndex === (this.suggestions.length - 1))
+        if (this.selectedIndex === this.suggestions.length - 1)
         {
             this.DOMSuggestions.firstChild.childNodes[this.selectedIndex].removeClassName('selected');
             this.selectedIndex = -1;
             this.DOMSearchInput.value = this.inputValue;
             return;
         }
+
         this.activate(this.selectedIndex + 1);
         this.DOMSearchInput.value = this.suggestions[this.selectedIndex];
     },
     onValueChange: function()
     {
         this.log('onValueChange().');
-        clearInterval(this.onChangeInterval);
+        clearTimeout(this.onChangeTimeoutId);
         this.lastTypedValue = this.typedValue.toLowerCase();
-        this.typedValue = this.DOMSearchInput.value.toLowerCase();
+        this.typedValue = this.formatSearchString(this.DOMSearchInput.value);
         this.inputValue = this.DOMSearchInput.value;
         this.selectedIndex = -1;
 
@@ -196,9 +194,6 @@ var Autocomplete = Class.create(
             this.ignoreValueChange = false;
             return;
         }
-
-        this.typedValue = this.cleansSearchString(this.typedValue);
-
         if (this.typedValue.blank() || this.typedValue.length < this.options.minChars)
         {
             this.hide();
@@ -208,11 +203,13 @@ var Autocomplete = Class.create(
             this.getSuggestions();
         }
     },
-    cleansSearchString: function(str)
+    formatSearchString: function(s)
     {
-        str = str.gsub(/\s{2,}/, ' '); // Replaces more than 2 spaces with one
-        str = str.gsub(/^\s+/, ''); // Trims beginning whitespace
-        return str;
+        s = s.gsub(/\s{2,}/, ' '); // Replaces more than 2 spaces with one
+        s = s.gsub(/^\s+/, '');    // Trims beginning whitespace
+        s = s.toLowerCase();
+
+        return s;
     },
     select: function(i)
     {
@@ -299,11 +296,7 @@ var Autocomplete = Class.create(
     },
     highlight: function(s)
     {
-//        var re = new RegExp('/^' + this.typedValue + '/');
-//        var re = new RegExp(/(^a)/);
-        var re = new RegExp('(^' + this.typedValue + ')');
-        console.log(this.typedValue);
-        return s.gsub(re, '<span class="highlight">#{1}</span>');
+        return s.gsub(new RegExp('(^' + this.typedValue + ')'), '<span class="highlight">#{1}</span>');
     },
     processResponse: function(xhr)
     {
@@ -332,7 +325,7 @@ var Autocomplete = Class.create(
         {
             this.refineLocally = true;
         }
-        if (encodeURIComponent(searchedString) === encodeURIComponent(this.cleansSearchString(this.DOMSearchInput.value.toLowerCase())))
+        if (encodeURIComponent(searchedString) === encodeURIComponent(this.formatSearchString(this.DOMSearchInput.value)))
         {
             this.getSuggestions();
         }
