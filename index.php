@@ -53,6 +53,8 @@ div.suggestions span.highlight
 new Autocomplete('search_input', {
     serviceUrl: 'autocomplete.php'
 });
+
+$('search_input').focus();
 </script> 
 </body>
 </html>
