@@ -6,23 +6,23 @@ if (!isset($_GET['q']))
 }
 
 $words = array(
-    'and', 'a an', 'a another', 'are', 'as',
+    'and', 'a an', 'a another', 'are', 'as', 'abé', 'abén',
     'at', 'all', 'an', 'about', 'after',
     'any', 'also', 'around', 'another', 'a question',
     'again', 'air', 'away', 'animal', 'answer',
-    'America', 'add', 'along', 'always', 'almost',
+    'america', 'add', 'along', 'always', 'almost',
     'above', 'am', 'ate', 'act', 'ant',
-    'absent', 'admit', 'album', 'Ann', 'able',
+    'absent', 'admit', 'album', 'ann', 'able',
     'ace', 'added', 'afraid', 'afternoon', 'age',
     'ahead', 'annoy', 'anything', 'anyway', 'anywhere',
     'ape', 'applaud', 'arm', 'artist', 'attack',
     'attic', 'auto', 'avoid', 'awesome', 'awful',
     'awning', 'aid', 'aim', 'arc', 'art',
-    'ash', 'axe', 'ax', 'against', 'American',
+    'ash', 'axe', 'ax', 'against', 'american',
     'among', 'asked', 'ah', 'ago', 'ache',
-    'aunt', 'agree', 'alive', 'apple', 'April',
+    'aunt', 'agree', 'alive', 'apple', 'april',
     'awake', 'adult', 'angry', 'anyone', 'arrive',
-    'asleep', 'August', 'avenue', 'airport', 'anybody',
+    'asleep', 'august', 'avenue', 'airport', 'anybody',
     'address', 'airplane', 'alphabet', 'astronaut', 'automobile',
 
     'bag', 'bad', 'bam', 'bat', 'bid',
@@ -32,8 +32,8 @@ $words = array(
     'between', 'below', 'begin', 'both', 'began',
     'book', 'being', 'best', 'better', 'black',
     'blue', 'bring', 'brown', 'buy', 'bake',
-    'band', 'bank', 'bell', 'belt', 'Ben',
-    'bend', 'bent', 'Bess', 'bike', 'bit',
+    'band', 'bank', 'bell', 'belt', 'ben',
+    'bend', 'bent', 'bess', 'bike', 'bit',
 
     'cap', 'cab', 'cop', 'con', 'cup',
     'cub', 'can', 'could', 'call', 'come',
@@ -44,7 +44,7 @@ $words = array(
     'clan', 'clap', 'clasp', 'class', 'cliff',
     'cling', 'clink', 'clip', 'close', 'clot',
 
-    'dad', 'Dan', 'dig', 'dip', 'Don',
+    'dad', 'dan', 'dig', 'dip', 'don',
     'dog', 'dud', 'dug', 'do', 'down',
     'day', 'did', 'does', 'different', 'don\'t',
     'done', 'draw', 'drink', 'dam', 'damp',
@@ -56,11 +56,11 @@ $words = array(
 
     'each', 'end', 'even', 'every', 'earth',
     'eye', 'example', 'enough', 'eat', 'eight',
-    'eve', 'expanded', 'Ellen', 'easel', 'easy',
+    'eve', 'expanded', 'ellen', 'easel', 'easy',
     'egg', 'elbow', 'enjoy', 'ever', 'evergreen',
     'everyone', 'everything', 'everywhere', 'explore', 'ear',
     'eel', 'elf', 'elk', 'elm', 'era',
-    'east', 'Ed', 'eyes', 'edge', 'else',
+    'east', 'ed', 'eyes', 'edge', 'else',
     'erase', 'eagle', 'empty', 'extra', 'earache',
     'excited', 'elephant', 'everybody',
 ); 
