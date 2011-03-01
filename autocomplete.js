@@ -16,8 +16,10 @@ var Autocomplete = Class.create(
         this.typedValue        = '';    // What the user types or selects.
         this.inputValue        = '';    // Mirror of the DOM input
         this.lastTypedValue    = '';    // Used when refining locally.
+        this.refinedTypedValue = '';
         this.enabled           = false; // Used when nothing is typed.
-        this.refineLocally     = false; // If less than 10 results, refine results locally (no additionnal ajax request).
+        this.needsLocalRefine  = false;
+        this.isAjaxCallOngoing = false;
         this.options           =        // Default options, replaced by options on instantiation.
         {
             serviceUrl         : '',
@@ -166,10 +168,10 @@ var Autocomplete = Class.create(
     onChange: function()
     {
         clearTimeout(this.onChangeTimeoutId);
-        this.lastTypedValue = this.typedValue.toLowerCase();
-        this.typedValue = this.formatSearchString(this.DOMSearchInput.value);
-        this.inputValue = this.DOMSearchInput.value;
-        this.selectedIndex = -1;
+        this.lastTypedValue = this.formatSearchString(this.typedValue);
+        this.typedValue     = this.formatSearchString(this.DOMSearchInput.value);
+        this.inputValue     = this.DOMSearchInput.value;
+        this.selectedIndex  = -1;
 
         if (!$(this.suggestionsId))
         {
@@ -187,6 +189,13 @@ var Autocomplete = Class.create(
         else
         {
             this.getSuggestions();
+
+            if (this.isAjaxCallOngoing)
+            {
+                return;
+            }
+
+            this.suggest();
         }
     },
     formatSearchString: function(s)
@@ -216,38 +225,49 @@ var Autocomplete = Class.create(
     },
     getSuggestions: function()
     {
-        if (Object.isArray(this.cachedResponse[encodeURIComponent(this.accentsTidy(this.typedValue))]))
+        console.log(this.refinedTypedValue);
+        if (Object.isArray(this.cachedResponse[this.typedValue]))
         {
-            this.suggestions = this.cachedResponse[encodeURIComponent(this.accentsTidy(this.typedValue))];
-            this.suggest();
+            this.suggestions = this.cachedResponse[this.typedValue];
+            return;
         }
-        else
+        if (this.needsLocalRefine)
         {
-            if (this.refineLocally)
+            if (this.typedValue.startsWith(this.refinedTypedValue) && this.typedValue.length > this.refinedTypedValue.length)
             {
-                if (!this.lastTypedValue.blank() && this.DOMSearchInput.value.toLowerCase().startsWith(this.lastTypedValue))
+                if (this.suggestions.any(function(item) {return item.startsWith(this.typedValue);}, this))
                 {
-                    this.suggestions = this.suggestions.findAll(function(o)
-                    {
-                        return this.accentsTidy(o).startsWith(this.accentsTidy(this.typedValue));
-                    }, this);
-                    this.cachedResponse[encodeURIComponent(this.accentsTidy(this.typedValue))] = this.suggestions;
-                    this.suggest();
-                    return;
+                    this.refineSuggestions();
                 }
                 else
                 {
-                    this.refineLocally = false;
+                    this.suggestions = [];
                 }
-            }
 
-            new Ajax.Request(this.options.serviceUrl, {
-                onComplete: this.processResponse.bind(this),
-                sanitizeJSON: true,
-                method: 'get',
-                parameters: {'q': this.typedValue}
-            });
+                this.cachedResponse[this.typedValue] = this.suggestions;
+                return;
+            }
+            else
+            {
+                this.needsLocalRefine = false;
+            }
         }
+
+        this.isAjaxCallOngoing = true;
+
+        new Ajax.Request(this.options.serviceUrl, {
+            onSuccess    : this.processResponse.bind(this),
+            sanitizeJSON : true,
+            method       : 'get',
+            parameters   : {'q': this.typedValue}
+        });
+    },
+    refineSuggestions: function()
+    {
+        this.suggestions = this.suggestions.findAll(function(item)
+        {
+            return item.startsWith(this.typedValue);
+        }, this);
     },
     suggest: function()
     {
@@ -284,33 +304,35 @@ var Autocomplete = Class.create(
     processResponse: function(xhr)
     {
         var response;
-        var searchedString;
 
         try
         {
             response = xhr.responseText.evalJSON();
-            searchedString = response.searchedString;
 
             if (!Object.isArray(response.results))
             {
                 response.results = [];
             }
         }
-        catch (err)
+        catch (error)
         {
             return;
         }
 
-        this.cachedResponse[encodeURIComponent(this.accentsTidy(this.typedValue))] = response.results;
+        this.cachedResponse[this.typedValue] = response.results;
         this.suggestions = response.results;
 
         if (this.suggestions.length < 10)
         {
-            this.refineLocally = true;
+            this.needsLocalRefine = true;
+            this.refinedTypedValue = this.typedValue;
         }
-        if (encodeURIComponent(searchedString) === encodeURIComponent(this.formatSearchString(this.DOMSearchInput.value)))
+
+        this.isAjaxCallOngoing = false;
+
+        if (response.searchedString === this.typedValue)
         {
-            this.getSuggestions();
+            this.suggest();
         }
     },
     activate: function(index)
@@ -333,19 +355,6 @@ var Autocomplete = Class.create(
         }
 
         return activeItem;
-    },
-    accentsTidy: function(s)
-    {
-        var r = s.toLowerCase();
-        r = r.replace(new RegExp('[àáâãäå]', 'g'), 'a');
-        r = r.replace(new RegExp('ç', 'g')       , 'c');
-        r = r.replace(new RegExp('[èéêë]', 'g')  , 'e');
-        r = r.replace(new RegExp('[ìíîï]', 'g')  , 'i');
-        r = r.replace(new RegExp('ñ', 'g')       , 'n');                            
-        r = r.replace(new RegExp('[òóôõö]', 'g') , 'o');
-        r = r.replace(new RegExp('[ùúûü]', 'g')  , 'u');
-        r = r.replace(new RegExp('[ýÿ]', 'g')    , 'y');
-        return r;
     }
 });
 
