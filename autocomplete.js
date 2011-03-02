@@ -4,29 +4,31 @@ var Autocomplete = Class.create(
     initialize: function(searchInputId, options)
     {
         this.instanceId         = Autocomplete.prototype.instances.push(this) - 1; // Instances tracking. Used by the page's onmouseover event.
-        this.searchInputId      = searchInputId;                         // The input text id to autocomplete on.
+        this.searchInputId      = searchInputId; // The input text id to autocomplete on.
         this.suggestionsId      = 'autocomplete_' + searchInputId;
         this.DOMSuggestions     = null;
         this.DOMSearchInput     = $(searchInputId);
         this.suggestions        = [];
-        this.selectedIndex      = -1;                                    // Index of the suggested element.
-        this.boundKiller        = null;                                  // Used to stop observing the document onclicked outside the search or suggestions.
-        this.ignoreValueChange  = false;                                 // Onclick or return events, we don't want to suggest anymore.
-        this.cachedResponse     = [];                                    // typedValue/response cache hash table.
-        this.onChangeTimeoutId  = null;
-        this.typedValue         = '';                                    // What the user types or selects.
-        this.inputValue         = '';                                    // Mirror of the DOM input
-        this.lastTypedValue     = '';                                    // Used when refining locally.
+        this.selectedIndex      = -1; // Index of the suggested element.
+        this.boundKiller        = null; // Used to stop observing the document onclicked outside the search or suggestions.
+        this.ignoreValueChange  = false; // Onclick or return events, we don't want to suggest anymore.
+        this.cachedResponse     = []; // typedValue/response cache hash table.
+        this.onChangeTimeoutId  = null; // Created when request defering.
+        this.typedValue         = ''; // What the user types or selects.
+        this.inputValue         = ''; // Mirror of the DOM input
+        this.lastTypedValue     = ''; // Used when refining locally.
         this.refinedTypedValues = [];
-        this.enabled            = false;                                 // Used when nothing is typed.
+        this.enabled            = false; // Used when nothing is typed.
         this.needsLocalRefine   = false;
         this.isAjaxCallOngoing  = false;
-        this.options            =                                        // Default options, replaced by options on instantiation.
+
+        // Default options, replaced by options on instantiation.
+        this.options            =
         {
             serviceUrl         : '',
-            autoSubmit         : true,  // When an item is selected through a click or return hit, submit the form or not.
-            minChars           : 1,     // Ajax request starts when minChars is reached.
-            deferRequestBy     : 100    // In milliseconds.
+            autoSubmit         : true, // When an item is selected through a click or return hit, submit the form or not.
+            minChars           : 1, // Ajax request starts when minChars is reached.
+            deferRequestBy     : 100 // In milliseconds.
         };
 
         Object.extend(this.options, options);
