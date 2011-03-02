@@ -18,7 +18,6 @@ var Autocomplete = Class.create(
         this.inputValue         = ''; // Mirror of the DOM input
         this.lastTypedValue     = ''; // Used when refining locally.
         this.refinedTypedValues = [];
-        this.enabled            = false; // Used when nothing is typed.
         this.needsLocalRefine   = false;
         this.isAjaxCallOngoing  = false;
 
@@ -45,10 +44,6 @@ var Autocomplete = Class.create(
     },
     onKeyDown: function(event)
     {
-        if (!this.enabled)
-        {
-            return;
-        }
         switch (event.keyCode)
         {
             case Event.KEY_ESC:
@@ -127,7 +122,6 @@ var Autocomplete = Class.create(
     },
     hide: function()
     {
-        this.enabled = false;
         this.selectedIndex = -1;
 
         if (this.DOMSuggestions)
@@ -303,7 +297,6 @@ var Autocomplete = Class.create(
 
         content.push('</div>');
 
-        this.enabled = true;
         this.DOMSuggestions.update(content.join('')).show();
     },
     highlight: function(s)
