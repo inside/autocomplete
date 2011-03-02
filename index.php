@@ -8,7 +8,6 @@
     <script type="text/javascript">google.load("prototype", "1.7.0.0");</script>
     <script type="text/javascript" src="autocomplete.js"></script>
 <style type="text/css">
-
 #search_input
 {
     width: 200px;
@@ -17,6 +16,7 @@
 #autocomplete_search_input
 {
     width: 200px;
+    position: absolute;
 }
 
 div.suggestions
@@ -46,7 +46,7 @@ div.suggestions span.highlight
 </style>
 </head>
 <body>
-<form action="" method="get" class="autocomplete"> 
+<form action="" method="get" class="autocomplete">
     <input type="text" name="search_input" value="" id="search_input" /><input type="submit" />
 </form>
 <script type="text/javascript">
@@ -55,6 +55,6 @@ new Autocomplete('search_input', {
 });
 
 $('search_input').focus();
-</script> 
+</script>
 </body>
 </html>
