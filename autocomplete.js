@@ -11,13 +11,13 @@ var Autocomplete = Class.create(
         this.suggestions        = [];
         this.selectedIndex      = -1; // Index of the suggested element.
         this.boundKiller        = null; // Used to stop observing the document onclicked outside the search or suggestions.
-        this.ignoreValueChange  = false; // Onclick or return events, we don't want to suggest anymore.
-        this.cachedResponse     = []; // typedValue/response cache hash table.
+        this.ignoreValueChange  = false; // Onclick or return events or when cycling through suggestions, we don't want to suggest anymore.
+        this.cachedResponse     = []; // typedValue / response cache hash table.
         this.onChangeTimeoutId  = null; // Created when request defering.
         this.typedValue         = ''; // What the user types or selects.
-        this.inputValue         = ''; // Mirror of the DOM input
+        this.inputValue         = ''; // Mirror of the DOM input, used when cycling through suggestions
         this.lastTypedValue     = ''; // Used when refining locally.
-        this.refinedTypedValues = [];
+        this.refineInitiators   = [];
         this.needsLocalRefine   = false;
         this.isAjaxCallOngoing  = false;
 
@@ -229,14 +229,14 @@ var Autocomplete = Class.create(
         }
         if (this.needsLocalRefine)
         {
-            var refinedTypedValue = this.refinedTypedValues.find(function(item)
+            var refineInitiator = this.refineInitiators.find(function(item)
             {
                 return this.typedValue.startsWith(item);
             }, this);
 
-            if (typeof(refinedTypedValue) !== 'undefined' &&
-                this.typedValue.startsWith(refinedTypedValue) &&
-                this.typedValue.length > refinedTypedValue.length)
+            if (typeof(refineInitiator) !== 'undefined' &&
+                this.typedValue.startsWith(refineInitiator) &&
+                this.typedValue.length > refineInitiator.length)
             {
                 if (this.suggestions.any(function(item) {return item.startsWith(this.typedValue);}, this))
                 {
@@ -327,7 +327,7 @@ var Autocomplete = Class.create(
         if (this.suggestions.length < 10)
         {
             this.needsLocalRefine = true;
-            this.refinedTypedValues.push(this.typedValue);
+            this.refineInitiators.push(this.typedValue);
         }
 
         this.isAjaxCallOngoing = false;
