@@ -1,8 +1,9 @@
 var Autocomplete = Class.create(
 {
+    instances: [],
     initialize: function(searchInputId, options)
     {
-        this.instanceId         = Autocomplete.instances.push(this) - 1; // Instances tracking. Used by the page's onmouseover event.
+        this.instanceId         = Autocomplete.prototype.instances.push(this) - 1; // Instances tracking. Used by the page's onmouseover event.
         this.searchInputId      = searchInputId;                         // The input text id to autocomplete on.
         this.suggestionsId      = 'autocomplete_' + searchInputId;
         this.DOMSuggestions     = null;
@@ -292,8 +293,8 @@ var Autocomplete = Class.create(
             content.push
             (
                 (this.selectedIndex === i ? '<div class="selected"' : '<div'),
-                ' onclick="Autocomplete.instances[', this.instanceId, '].select(', i, ');"',
-                ' onmouseover="Autocomplete.instances[', this.instanceId, '].activate(', i, ');">',
+                ' onclick="Autocomplete.prototype.instances[', this.instanceId, '].select(', i, ');"',
+                ' onmouseover="Autocomplete.prototype.instances[', this.instanceId, '].activate(', i, ');">',
                 '<span class="suggestion">', this.highlight(value), '</span>', '</div>'
             );
         }.bind(this));
@@ -363,5 +364,3 @@ var Autocomplete = Class.create(
         return activeItem;
     }
 });
-
-Autocomplete.instances = [];
