@@ -1,0 +1,19 @@
+Autocomplete
+
+This javascript/Prototype.js program solves the problem of html text input
+autocompletion. It minimizes web server requests by implementing a local cache
+and a local refine if returned results are less than 10 (default value). Tomas
+Kirda at http://www.devbridge.com/projects/autocomplete/ has inspired much of
+the work here.
+
+You need a webserver running PHP for the example to work, but any server side
+scripting langage will do as long as it returns a JSON formatted response. For
+example, if the typed string is "ba", the JSON is:
+
+{"searchedString":"ba","results":["bag","bad","bam","bat","back","bake","band","bank"]}
+
+A basic CSS is here to help you, along with the word list stopping at the letter
+"e". Multiple autocompleted text input can be integrated in one page.
+
+Autocomplete is distributed under the terms of an MIT-style license as the
+original work by Tomas Kirda is.
